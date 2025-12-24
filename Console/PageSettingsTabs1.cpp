@@ -21,6 +21,7 @@ PageSettingsTabs1::PageSettingsTabs1()
 , m_strShell(L"")
 , m_strInitialDir(L"")
 , m_nRunAs(0)
+, m_bUntrusted(false)
 , m_strUser(L"")
 , m_bNetOnly(false)
 , m_tabShellEdit(this)
@@ -211,6 +212,7 @@ void PageSettingsTabs1::Load(std::shared_ptr<TabData>& tabData)
 	m_strShell        = m_tabData->strShell.c_str();
 	m_strInitialDir   = m_tabData->strInitialDir.c_str();
 	m_nRunAs          = m_tabData->bRunAsUser? 2 : m_tabData->bRunAsAdministrator? 1 : 0;
+	m_bUntrusted      = m_tabData->bUntrusted;
 	m_strUser         = m_tabData->strUser.c_str();
 	m_bNetOnly        = m_tabData->bNetOnly;
 
@@ -237,6 +239,7 @@ void PageSettingsTabs1::Save()
 	m_tabData->strShell            = m_strShell;
 	m_tabData->strInitialDir       = m_strInitialDir;
 	m_tabData->bRunAsUser          = m_nRunAs == 2;
+	m_tabData->bUntrusted          = m_bUntrusted;
 	m_tabData->strUser             = m_strUser;
 	m_tabData->bNetOnly            = m_bNetOnly;
 	m_tabData->bRunAsAdministrator = m_nRunAs == 1;

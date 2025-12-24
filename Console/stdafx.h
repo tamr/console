@@ -85,6 +85,7 @@ extern CAppModule _Module;
 
 #include <HtmlHelp.h>
 #include <ShellApi.h>
+#include <winsafer.h>
 #include <tlhelp32.h>
 #include <Psapi.h>
 #include <winuser.h>
