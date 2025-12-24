@@ -201,7 +201,7 @@ class ConsoleView
 		void RepaintText(CDC& dc);
 		void RepaintTextChanges(CDC& dc);
 		void RowTextOut(CDC& dc, DWORD dwRow);
-		inline void ExtTextOut(CDC& dc, CRect & rect, std::wstring & strText, COLORREF colorFG);
+		inline void RowExtTextOut(CDC& dc, CRect & rect, std::wstring & strText, COLORREF colorFG, int fontTextType);
 
 		void BitBltOffscreen(bool bOnlyCursor = false);
 		void UpdateOffscreen(const CRect& rectBlit);
@@ -304,6 +304,7 @@ private:
 	};
 
   static CFont          m_fontText[4];
+  static CFont          m_fontTextFallback[4];
 
   static int            m_nCharHeight;
   static int            m_nCharWidth;

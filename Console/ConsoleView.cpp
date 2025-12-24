@@ -22,6 +22,7 @@
 //CBitmap	ConsoleView::m_bmpText;
 
 CFont ConsoleView::m_fontText[4];
+CFont ConsoleView::m_fontTextFallback[4];
 DWORD ConsoleView::m_dwFontSize(0);
 DWORD ConsoleView::m_dwFontZoom(100); // 100 %
 DWORD ConsoleView::m_dwScreenDpi(96);
@@ -439,6 +440,31 @@ LRESULT ConsoleView::OnConsoleFwdMsg(UINT uMsg, WPARAM wParam, LPARAM lParam, BO
 
 			if( !boolPostMessage )
 			{
+				// Check if this key matches the configured line break hotkey
+				// and convert it to Shift+Enter if so
+				const HotKeys& hotKeys = g_settingsHandler->GetHotKeys();
+				HotKeys::CommandIDIndex::iterator itLineBreak = hotKeys.commands.get<HotKeys::commandID>().find(static_cast<WORD>(ID_SEND_LINEBREAK));
+				if (itLineBreak != hotKeys.commands.get<HotKeys::commandID>().end())
+				{
+					const HotKeys::CommandData& cmdData = **itLineBreak;
+					if (cmdData.accelHotkey.key != 0 &&
+					    keyEvent.wVirtualKeyCode == cmdData.accelHotkey.key)
+					{
+						// Build modifier flags from current key state
+						BYTE fVirt = FVIRTKEY;
+						if (keyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) fVirt |= FCONTROL;
+						if (keyEvent.dwControlKeyState & SHIFT_PRESSED) fVirt |= FSHIFT;
+						if (keyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) fVirt |= FALT;
+
+						if (fVirt == cmdData.accelHotkey.fVirt)
+						{
+							// Convert to Shift+Enter: remove Ctrl/Alt, add Shift
+							keyEvent.dwControlKeyState &= ~(LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED | LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED);
+							keyEvent.dwControlKeyState |= SHIFT_PRESSED;
+						}
+					}
+				}
+
 				TRACE_KEY(
 					L"-> WriteConsoleInput\n"
 					L"  bKeyDown          = %s\n"
@@ -1477,6 +1503,8 @@ bool ConsoleView::RecreateFont(DWORD dwNewFontSize, bool boolZooming, DWORD dwSc
 
 	for( CFont& font : m_fontText )
 		if( !font.IsNull() ) font.DeleteObject();
+	for( CFont& font : m_fontTextFallback )
+		if( !font.IsNull() ) font.DeleteObject();
 
 	if (!CreateFont(g_settingsHandler->GetAppearanceSettings().fontSettings.strName))
 	{
@@ -2123,6 +2151,116 @@ bool ConsoleView::CreateFont(const std::wstring& strFontName)
 		DEFAULT_PITCH,
 		strFontName.c_str());
 
+	// Create fallback fonts for symbols not present in the primary font
+	// Try multiple fonts in order of preference for best Unicode coverage
+	static const wchar_t* fallbackFonts[] = {
+		L"Segoe UI Emoji",      // Best coverage on Windows 10+
+		L"Segoe UI Symbol",     // Good symbol coverage
+		L"Arial Unicode MS",    // Very broad Unicode coverage (if installed)
+		nullptr
+	};
+
+	bBold   = fontSettings.bBold;
+	bItalic = fontSettings.bItalic;
+
+	// Find a working fallback font
+	const wchar_t* fallbackFontName = nullptr;
+	for (int f = 0; fallbackFonts[f] != nullptr; ++f)
+	{
+		CFont testFont;
+		testFont.CreateFont(
+			-::MulDiv(m_dwFontSize, m_dwScreenDpi, 72),
+			0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+			byFontQuality, DEFAULT_PITCH, fallbackFonts[f]);
+
+		if (!testFont.IsNull())
+		{
+			// Verify this font actually has glyphs (not just mapped to a default)
+			LOGFONT lf;
+			testFont.GetLogFont(lf);
+			if (_wcsicmp(lf.lfFaceName, fallbackFonts[f]) == 0)
+			{
+				fallbackFontName = fallbackFonts[f];
+				testFont.DeleteObject();
+				break;
+			}
+			testFont.DeleteObject();
+		}
+	}
+
+	if (fallbackFontName != nullptr)
+	{
+		m_fontTextFallback[FontTextNormal].CreateFont(
+			-::MulDiv(m_dwFontSize, m_dwScreenDpi, 72),
+			0,
+			0,
+			0,
+			bBold ? FW_BOLD : 0,
+			bItalic,
+			FALSE,
+			FALSE,
+			DEFAULT_CHARSET,
+			OUT_DEFAULT_PRECIS,
+			CLIP_DEFAULT_PRECIS,
+			byFontQuality,
+			DEFAULT_PITCH,
+			fallbackFontName);
+
+		m_fontTextFallback[FontTextUnderline].CreateFont(
+			-::MulDiv(m_dwFontSize, m_dwScreenDpi, 72),
+			0,
+			0,
+			0,
+			bBold ? FW_BOLD : 0,
+			bItalic,
+			TRUE,
+			FALSE,
+			DEFAULT_CHARSET,
+			OUT_DEFAULT_PRECIS,
+			CLIP_DEFAULT_PRECIS,
+			byFontQuality,
+			DEFAULT_PITCH,
+			fallbackFontName);
+
+		if( fontSettings.bBoldIntensified )
+			bBold = !bBold;
+		if( fontSettings.bItalicIntensified )
+			bItalic = !bItalic;
+
+		m_fontTextFallback[FontTextBright].CreateFont(
+			-::MulDiv(m_dwFontSize, m_dwScreenDpi, 72),
+			0,
+			0,
+			0,
+			bBold ? FW_BOLD : 0,
+			bItalic,
+			FALSE,
+			FALSE,
+			DEFAULT_CHARSET,
+			OUT_DEFAULT_PRECIS,
+			CLIP_DEFAULT_PRECIS,
+			byFontQuality,
+			DEFAULT_PITCH,
+			fallbackFontName);
+
+		m_fontTextFallback[FontTextBrightUnderline].CreateFont(
+			-::MulDiv(m_dwFontSize, m_dwScreenDpi, 72),
+			0,
+			0,
+			0,
+			bBold ? FW_BOLD : 0,
+			bItalic,
+			TRUE,
+			FALSE,
+			DEFAULT_CHARSET,
+			OUT_DEFAULT_PRECIS,
+			CLIP_DEFAULT_PRECIS,
+			byFontQuality,
+			DEFAULT_PITCH,
+			fallbackFontName);
+	}
+
 	TEXTMETRIC	textMetric;
 
 	dcText.SelectFont(m_fontText[FontTextNormal]);
@@ -2131,6 +2269,8 @@ bool ConsoleView::CreateFont(const std::wstring& strFontName)
 	{
 		TRACE(L"/!\\ can't use %s font\n", strFontName.c_str());
 		for( CFont& font : m_fontText )
+			if( !font.IsNull() ) font.DeleteObject();
+		for( CFont& font : m_fontTextFallback )
 			if( !font.IsNull() ) font.DeleteObject();
 		return false;
 	}
@@ -3033,7 +3173,7 @@ void ConsoleView::RowTextOut(CDC& dc, DWORD dwRow)
         // in italic a part of the previous char is drawn in the following char space
         rect.right  = dwX + dwFGWidth + nCharWidth;
 
-        ExtTextOut(dc, rect, strText, colorFG);
+        RowExtTextOut(dc, rect, strText, colorFG, fontTextType);
 
         strText.clear();
         colorFG   = colorFG2;
@@ -3062,7 +3202,7 @@ void ConsoleView::RowTextOut(CDC& dc, DWORD dwRow)
     rect.bottom = dwY + m_nCharHeight;
     rect.right  = dwX + dwFGWidth;
 
-    ExtTextOut(dc, rect, strText, colorFG);
+    RowExtTextOut(dc, rect, strText, colorFG, fontTextType);
   }
 
 	auto now4 = std::chrono::high_resolution_clock::now();
@@ -3075,19 +3215,67 @@ void ConsoleView::RowTextOut(CDC& dc, DWORD dwRow)
 		std::chrono::duration_cast<std::chrono::nanoseconds>(now4 - now3).count());
 }
 
-inline void ConsoleView::ExtTextOut(CDC& dc, CRect & rect, std::wstring & strText, COLORREF colorFG)
+inline void ConsoleView::RowExtTextOut(CDC& dc, CRect & rect, std::wstring & strText, COLORREF colorFG, int fontTextType)
 {
 	dc.SetBkMode(TRANSPARENT);
+	dc.SetTextColor(colorFG);
 
+	UINT textLen = static_cast<UINT>(strText.length());
+	if (textLen == 0) return;
+
+	// Check for missing glyphs and handle fallback if needed
+	bool hasMissingGlyphs = false;
+	std::unique_ptr<WORD[]> glyphIndices;
+
+	if (!m_fontTextFallback[fontTextType].IsNull())
+	{
+		glyphIndices.reset(new WORD[textLen]);
+		DWORD result = ::GetGlyphIndices(dc, strText.c_str(), textLen, glyphIndices.get(), GGI_MARK_NONEXISTING_GLYPHS);
+
+		if (result != GDI_ERROR)
+		{
+			for (UINT i = 0; i < textLen; ++i)
+			{
+				if (glyphIndices[i] == 0xFFFF)
+				{
+					hasMissingGlyphs = true;
+					break;
+				}
+			}
+		}
+	}
+
+	if (hasMissingGlyphs)
+	{
+		// Render character by character, using fallback font for missing glyphs
+		int currentX = rect.left;
+		for (UINT i = 0; i < textLen; ++i)
+		{
+			CRect charRect = rect;
+			charRect.left = currentX;
+			charRect.right = currentX + m_dxWidths[i];
+
+			if (glyphIndices[i] == 0xFFFF)
+			{
+				// Use fallback font for this character
+				dc.SelectFont(m_fontTextFallback[fontTextType]);
+				dc.ExtTextOut(currentX, rect.top, ETO_CLIPPED, &charRect, &strText[i], 1, &m_dxWidths[i]);
+				// Restore primary font
+				dc.SelectFont(m_fontText[fontTextType]);
+			}
+			else
+			{
+				// Use primary font
+				dc.ExtTextOut(currentX, rect.top, ETO_CLIPPED, &charRect, &strText[i], 1, &m_dxWidths[i]);
+			}
+			currentX += m_dxWidths[i];
+		}
+		return;
+	}
+
+	// No missing glyphs - use standard rendering (with ligature support if enabled)
 	if( m_appearanceSettings.fontSettings.bLigature )
 	{
-#if 0
-		dc.SetTextColor(RGB(240, 0, 0));
-		dc.ExtTextOut(rect.left, rect.top, ETO_CLIPPED, &rect, strText.c_str(), static_cast<UINT>(strText.length()), m_dxWidths.get());
-#endif
-
-		dc.SetTextColor(colorFG);
-
 		GCP_RESULTS gcpResults = {
 			sizeof(GCP_RESULTS),                // DWORD lStructSize
 			nullptr,                            // LPWSTR lpOutString
@@ -3121,14 +3309,13 @@ inline void ConsoleView::ExtTextOut(CDC& dc, CRect & rect, std::wstring & strTex
 		}
 		else
 		{
-			TRACE(L"GetCharacterPlacement fails\n");
+			// Fallback if GetCharacterPlacement fails
+			dc.ExtTextOut(rect.left, rect.top, ETO_CLIPPED, &rect, strText.c_str(), textLen, m_dxWidths.get());
 		}
 	}
 	else
 	{
-		dc.SetTextColor(colorFG);
-
-		dc.ExtTextOut(rect.left, rect.top, ETO_CLIPPED, &rect, strText.c_str(), static_cast<UINT>(strText.length()), m_dxWidths.get());
+		dc.ExtTextOut(rect.left, rect.top, ETO_CLIPPED, &rect, strText.c_str(), textLen, m_dxWidths.get());
 	}
 }
 

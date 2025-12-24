@@ -2091,6 +2091,7 @@ HotKeys::HotKeys()
 	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"cmdSnippets",        ID_SHOW_CONTEXT_MENU_SNIPPETS,  ID_SHOW_CONTEXT_MENU_SNIPPETS )));
 
 	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"ctrlC",              ID_SEND_CTRL_C,          IDS_SEND_CTRL_C    )));
+	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"linebreak",          ID_SEND_LINEBREAK,       IDS_SEND_LINEBREAK )));
 
 	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"wspload",            ID_LOAD_WORKSPACE,       IDS_LOAD_WORKSPACE )));
 	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"wspsave",            ID_SAVE_WORKSPACE,       IDS_SAVE_WORKSPACE )));

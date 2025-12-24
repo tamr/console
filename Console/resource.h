@@ -419,6 +419,7 @@
 #define ID_RESTORE_VIEW                 2946
 #define ID_MOVE_IN_NEW_TAB              2947
 #define ID_CLONE_TAB                    2948
+#define ID_SEND_LINEBREAK               2949
 
 #define IDC_DUMP_BUFFER                 3000
 
@@ -538,6 +539,7 @@
 #define IDS_RESTORE_VIEW                6097
 #define IDS_MOVE_IN_NEW_TAB             6098
 #define IDS_CLONE_TAB                   6099
+#define IDS_SEND_LINEBREAK              6100
 
 #define IDS_TABBINGFRAMEWORK_TIPS_SCROLLRIGHT 6900
 #define IDS_TABBINGFRAMEWORK_TIPS_SCROLLLEFT  6901
