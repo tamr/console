@@ -440,6 +440,23 @@ LRESULT ConsoleView::OnConsoleFwdMsg(UINT uMsg, WPARAM wParam, LPARAM lParam, BO
 
 			if( !boolPostMessage )
 			{
+				// Check if this key matches the configured line break hotkey
+				// and convert it to Shift+Enter if so
+				const HotKeys::LineBreakHotkey& lineBreakHotkey = g_settingsHandler->GetHotKeys().lineBreakHotkey;
+				if (lineBreakHotkey.IsEnabled() && keyEvent.wVirtualKeyCode == VK_RETURN)
+				{
+					bool hasCtrl = (keyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) != 0;
+					bool hasShift = (keyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
+					bool hasAlt = (keyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) != 0;
+
+					if (lineBreakHotkey.Matches(VK_RETURN, hasCtrl, hasShift, hasAlt))
+					{
+						// Convert to Shift+Enter: remove Ctrl/Alt, add Shift
+						keyEvent.dwControlKeyState &= ~(LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED | LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED);
+						keyEvent.dwControlKeyState |= SHIFT_PRESSED;
+					}
+				}
+
 				TRACE_KEY(
 					L"-> WriteConsoleInput\n"
 					L"  bKeyDown          = %s\n"
