@@ -36,7 +36,6 @@ LRESULT DlgSettingsHotkeys::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARA
 	m_listCtrl.Attach(GetDlgItem(IDC_LIST_HOTKEYS));
 	m_editCommand.Attach(GetDlgItem(IDC_EDIT_COMMAND));
 	m_hotKeyEdit.SubclassWindow(GetDlgItem(IDC_EDIT_HOTKEY));
-	m_lineBreakHotKeyEdit.SubclassWindow(GetDlgItem(IDC_EDIT_LINEBREAK_HOTKEY));
 
 	m_listCtrl.SetExtendedListViewStyle(m_listCtrl.GetExtendedListViewStyle()|LVS_EX_FULLROWSELECT);
 
@@ -66,13 +65,6 @@ LRESULT DlgSettingsHotkeys::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARA
 	}
 
 	m_listCtrl.SelectItem(0);
-
-	// Initialize line break hotkey display
-	WORD wLineBreakModifiers = 0;
-	if (m_hotKeys.lineBreakHotkey.bCtrl)  wLineBreakModifiers |= HOTKEYF_CONTROL;
-	if (m_hotKeys.lineBreakHotkey.bShift) wLineBreakModifiers |= HOTKEYF_SHIFT;
-	if (m_hotKeys.lineBreakHotkey.bAlt)   wLineBreakModifiers |= HOTKEYF_ALT;
-	m_lineBreakHotKeyEdit.SetHotKey(m_hotKeys.lineBreakHotkey.wVirtualKey, wLineBreakModifiers);
 
 	DoDataExchange(DDX_LOAD);
 	return TRUE;
@@ -193,46 +185,6 @@ LRESULT DlgSettingsHotkeys::OnBtnClear(WORD /*wNotifyCode*/, WORD /*wID*/, HWND 
 	if( m_hotKeyEdit.m_hWnd == GetFocus() ) return 0;
 
 	m_hotKeyEdit.SetHotKey(0, 0);
-	return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-LRESULT DlgSettingsHotkeys::OnBtnLineBreakAssign(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	if( m_lineBreakHotKeyEdit.m_hWnd == GetFocus() ) return 0;
-
-	UINT	uiVirtualKeyCode = 0;
-	WORD	wModifiers = 0;
-
-	m_lineBreakHotKeyEdit.GetHotKey(uiVirtualKeyCode, wModifiers);
-
-	m_hotKeys.lineBreakHotkey.wVirtualKey = static_cast<WORD>(uiVirtualKeyCode);
-	m_hotKeys.lineBreakHotkey.bCtrl  = (wModifiers & HOTKEYF_CONTROL) != 0;
-	m_hotKeys.lineBreakHotkey.bShift = (wModifiers & HOTKEYF_SHIFT) != 0;
-	m_hotKeys.lineBreakHotkey.bAlt   = (wModifiers & HOTKEYF_ALT) != 0;
-
-	return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-LRESULT DlgSettingsHotkeys::OnBtnLineBreakClear(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	if( m_lineBreakHotKeyEdit.m_hWnd == GetFocus() ) return 0;
-
-	m_lineBreakHotKeyEdit.SetHotKey(0, 0);
-	m_hotKeys.lineBreakHotkey.wVirtualKey = 0;
-	m_hotKeys.lineBreakHotkey.bCtrl = false;
-	m_hotKeys.lineBreakHotkey.bShift = false;
-	m_hotKeys.lineBreakHotkey.bAlt = false;
-
 	return 0;
 }
 
