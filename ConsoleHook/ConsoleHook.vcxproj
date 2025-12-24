@@ -50,7 +50,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'!='Release Legacy|Win32' And '$(Configuration)|$(Platform)'!='Debug Legacy|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <UseOfAtl>false</UseOfAtl>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -90,7 +90,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <BoostIncludePath>C:\gitstuff\boost_1_76_0</BoostIncludePath>
+    <BoostIncludePath>e:\Projects\boost-1.90.0</BoostIncludePath>
   </PropertyGroup>
   <Import Project="BoostIncludePath.props.user" Condition="exists('BoostIncludePath.props.user')" />
   <PropertyGroup>
