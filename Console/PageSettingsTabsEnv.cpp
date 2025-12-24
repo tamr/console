@@ -28,6 +28,7 @@ LRESULT PageSettingsTabsEnv::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPAR
 	m_editVariable.Attach(GetDlgItem(IDC_ENV_VARIABLE));
 	m_editValue.Attach(GetDlgItem(IDC_ENV_VALUE));
 	m_editClinkPath.Attach(GetDlgItem(IDC_CLINK_PATH));
+	m_checkUTF8Locale.Attach(GetDlgItem(IDC_CHECK_UTF8_LOCALE));
 
 	return TRUE;
 }
@@ -53,6 +54,7 @@ void PageSettingsTabsEnv::Load(std::shared_ptr<TabData>& tabData)
 	}
 
 	m_editClinkPath.SetWindowText(m_tabData->strClinkPath.c_str());
+	m_checkUTF8Locale.SetCheck(m_tabData->bUTF8Locale ? BST_CHECKED : BST_UNCHECKED);
 }
 
 void PageSettingsTabsEnv::Save()
@@ -78,6 +80,7 @@ void PageSettingsTabsEnv::Save()
 	CString strClinkPath;
 	m_editClinkPath.GetWindowText(strClinkPath);
 	m_tabData->strClinkPath = strClinkPath.GetString();
+	m_tabData->bUTF8Locale = (m_checkUTF8Locale.GetCheck() == BST_CHECKED);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -44,6 +44,7 @@ class PageSettingsTabsEnv
 		CEdit               m_editVariable;
 		CEdit               m_editValue;
 		CEdit               m_editClinkPath;
+		CButton             m_checkUTF8Locale;
 };
 
 //////////////////////////////////////////////////////////////////////////////

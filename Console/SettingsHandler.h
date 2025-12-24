@@ -918,6 +918,7 @@ struct TabData
 	, bRunAsAdministrator(false)
 	, bUntrusted(false)
 	, strClinkPath(L"")
+	, bUTF8Locale(false)
 	, bCloneable(true)
 	, bInheritedCursor(true)
 	, dwCursorStyle(0)
@@ -965,6 +966,7 @@ struct TabData
 	bool							bRunAsAdministrator;
 	bool							bUntrusted;
 	std::wstring					strClinkPath;
+	bool							bUTF8Locale;
 	bool							bCloneable;
 
 	bool							bInheritedCursor;

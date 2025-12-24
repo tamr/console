@@ -2472,6 +2472,7 @@ bool TabSettings::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"run_as_admin"), tabData->bRunAsAdministrator, false);
 			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"untrusted"), tabData->bUntrusted, false);
 			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"clink_path"), tabData->strClinkPath, L"");
+			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"utf8_locale"), tabData->bUTF8Locale, false);
 
 			CComPtr<IXMLDOMNodeList> pEnvNodes;
 			if (FAILED(pConsoleElement->selectNodes(CComBSTR(L"env"), &pEnvNodes))) return false;
@@ -2643,6 +2644,7 @@ bool TabSettings::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"run_as_admin"), (*itTab)->bRunAsAdministrator);
 		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"untrusted"), (*itTab)->bUntrusted);
 		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"clink_path"), (*itTab)->strClinkPath);
+		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"utf8_locale"), (*itTab)->bUTF8Locale);
 
 		// add <env> tag
 		if(! (*itTab)->environmentVariables.empty() )

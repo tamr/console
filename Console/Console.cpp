@@ -289,6 +289,13 @@ int Run(LPTSTR lpstrCmdLine = NULL, int nCmdShow = SW_SHOWDEFAULT)
 						strShell = strShell + L" /k " + strStartupCommands;
 					}
 
+					// Build environment variables, adding LANG if UTF-8 locale is enabled
+					std::vector<std::shared_ptr<VarEnv>> envVars = tabData->get()->environmentVariables;
+					if (tabData->get()->bUTF8Locale)
+					{
+						envVars.push_back(std::make_shared<VarEnv>(L"LANG", L"C.UTF-8"));
+					}
+
 					if (commandLineOptions.startupShellArgs.size() > 0 && commandLineOptions.startupShellArgs[0].length() > 0)
 					{
 						consoleOptions.strShellArguments = commandLineOptions.startupShellArgs[0];
@@ -310,7 +317,7 @@ int Run(LPTSTR lpstrCmdLine = NULL, int nCmdShow = SW_SHOWDEFAULT)
 							consoleOptions,
 							strSyncName,
 							strShell,
-							tabData->get()->environmentVariables
+							envVars
 						);
 					}
 					catch (const ConsoleException& ex)

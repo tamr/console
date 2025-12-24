@@ -357,6 +357,7 @@
 #define IDC_BTN_DOSKEY_EDIT              1264
 #define IDC_DOSKEY_ALIAS                 1265
 #define IDC_DOSKEY_COMMAND               1266
+#define IDC_CHECK_UTF8_LOCALE            1267
 
 #define ID_SNIPPET_ID_FIRST             1900
 #define ID_SNIPPET_ID_LAST              1999
@@ -661,7 +662,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        400
 #define _APS_NEXT_COMMAND_VALUE         32805
-#define _APS_NEXT_CONTROL_VALUE         1267
+#define _APS_NEXT_CONTROL_VALUE         1268
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

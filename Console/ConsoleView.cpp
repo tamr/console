@@ -181,6 +181,13 @@ LRESULT ConsoleView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, B
 			strShell = strShell + L" /k " + strStartupCommands;
 		}
 
+		// Build environment variables, adding LANG if UTF-8 locale is enabled
+		std::vector<std::shared_ptr<VarEnv>> envVars = m_tabDataShell->environmentVariables;
+		if (m_tabDataShell->bUTF8Locale)
+		{
+			envVars.push_back(std::make_shared<VarEnv>(L"LANG", L"C.UTF-8"));
+		}
+
 		UserCredentials* userCredentials = consoleViewCreate->u.userCredentials;
 
 		consoleOptions.strTitle = m_tabDataShell->strTitle;
@@ -194,7 +201,7 @@ LRESULT ConsoleView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, B
 				consoleOptions,
 				strShell,
 				*userCredentials,
-				m_tabDataShell->environmentVariables,
+				envVars,
 				m_dwStartupRows,
 				m_dwStartupColumns);
 
