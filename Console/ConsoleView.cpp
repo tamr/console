@@ -3112,7 +3112,7 @@ void ConsoleView::RowTextOut(CDC& dc, DWORD dwRow)
         // in italic a part of the previous char is drawn in the following char space
         rect.right  = dwX + dwFGWidth + nCharWidth;
 
-        ExtTextOut(dc, rect, strText, colorFG, fontTextType);
+        RowExtTextOut(dc, rect, strText, colorFG, fontTextType);
 
         strText.clear();
         colorFG   = colorFG2;
@@ -3141,7 +3141,7 @@ void ConsoleView::RowTextOut(CDC& dc, DWORD dwRow)
     rect.bottom = dwY + m_nCharHeight;
     rect.right  = dwX + dwFGWidth;
 
-    ExtTextOut(dc, rect, strText, colorFG, fontTextType);
+    RowExtTextOut(dc, rect, strText, colorFG, fontTextType);
   }
 
 	auto now4 = std::chrono::high_resolution_clock::now();
@@ -3154,7 +3154,7 @@ void ConsoleView::RowTextOut(CDC& dc, DWORD dwRow)
 		std::chrono::duration_cast<std::chrono::nanoseconds>(now4 - now3).count());
 }
 
-inline void ConsoleView::ExtTextOut(CDC& dc, CRect & rect, std::wstring & strText, COLORREF colorFG, FontTextType fontTextType)
+inline void ConsoleView::RowExtTextOut(CDC& dc, CRect & rect, std::wstring & strText, COLORREF colorFG, int fontTextType)
 {
 	dc.SetBkMode(TRANSPARENT);
 
