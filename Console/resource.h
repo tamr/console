@@ -347,6 +347,9 @@
 #define IDC_CHECK_KEEP_VIEW_THEME        1255
 #define IDC_TABS_TRANSPARENCY            1256
 #define IDC_CHECK_HIDE_TAB_NEW_BUTTON    1257
+#define IDC_EDIT_LINEBREAK_HOTKEY        1258
+#define IDC_BTN_LINEBREAK_ASSIGN         1259
+#define IDC_BTN_LINEBREAK_CLEAR          1260
 
 #define ID_SNIPPET_ID_FIRST             1900
 #define ID_SNIPPET_ID_LAST              1999
