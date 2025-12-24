@@ -27,6 +27,7 @@ LRESULT PageSettingsTabsEnv::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPAR
 
 	m_editVariable.Attach(GetDlgItem(IDC_ENV_VARIABLE));
 	m_editValue.Attach(GetDlgItem(IDC_ENV_VALUE));
+	m_editClinkPath.Attach(GetDlgItem(IDC_CLINK_PATH));
 
 	return TRUE;
 }
@@ -50,6 +51,8 @@ void PageSettingsTabsEnv::Load(std::shared_ptr<TabData>& tabData)
 
 		m_listCtrl.SetItemText(nItem, 1, m_tabData->environmentVariables[i]->strEnvValue.c_str());
 	}
+
+	m_editClinkPath.SetWindowText(m_tabData->strClinkPath.c_str());
 }
 
 void PageSettingsTabsEnv::Save()
@@ -71,6 +74,10 @@ void PageSettingsTabsEnv::Save()
 		varenv->bEnvChecked = m_listCtrl.GetCheckState(nItem)? true : false;
 		m_tabData->environmentVariables.push_back(varenv);
 	}
+
+	CString strClinkPath;
+	m_editClinkPath.GetWindowText(strClinkPath);
+	m_tabData->strClinkPath = strClinkPath.GetString();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -124,6 +131,23 @@ LRESULT PageSettingsTabsEnv::OnClickedBtnEnvEdit(WORD /*wNotifyCode*/, WORD /*wI
 
 	m_editVariable.SetWindowText(strVariable);
 	m_editValue.SetWindowText(strValue);
+
+	return 0;
+}
+
+LRESULT PageSettingsTabsEnv::OnClickedBtnBrowseClink(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	CFileDialog fileDialog(
+		TRUE,
+		NULL,
+		NULL,
+		OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST,
+		L"Batch files (*.bat;*.cmd)\0*.bat;*.cmd\0All files (*.*)\0*.*\0\0");
+
+	if (fileDialog.DoModal() == IDOK)
+	{
+		m_editClinkPath.SetWindowText(fileDialog.m_szFileName);
+	}
 
 	return 0;
 }

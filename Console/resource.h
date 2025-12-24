@@ -35,6 +35,7 @@
 #define IDD_SETTINGS_BEHAVIOR_2         220
 #define IDD_SETTINGS_TABS_ENV           221
 #define IDD_SETTINGS_CONTROLS           222
+#define IDD_SETTINGS_TABS_DOSKEY        223
 
 #define IDR_TOOLBAR_16                  300
 #define IDR_FULLSCREEN1_16              301
@@ -348,6 +349,14 @@
 #define IDC_TABS_TRANSPARENCY            1256
 #define IDC_CHECK_HIDE_TAB_NEW_BUTTON    1257
 #define IDC_CHECK_UNTRUSTED              1258
+#define IDC_CLINK_PATH                   1259
+#define IDC_BTN_BROWSE_CLINK             1260
+#define IDC_LIST_DOSKEY                  1261
+#define IDC_BTN_DOSKEY_ADD               1262
+#define IDC_BTN_DOSKEY_DELETE            1263
+#define IDC_BTN_DOSKEY_EDIT              1264
+#define IDC_DOSKEY_ALIAS                 1265
+#define IDC_DOSKEY_COMMAND               1266
 
 #define ID_SNIPPET_ID_FIRST             1900
 #define ID_SNIPPET_ID_LAST              1999
@@ -582,6 +591,9 @@
 #define IDS_SETTINGS_WINDOWED           8021
 #define IDS_SETTINGS_CONTROLS           8022
 #define IDS_SETTINGS_TAB                8023
+#define IDS_SETTINGS_DOSKEY             8024
+#define IDS_SETTINGS_ALIAS              8025
+#define IDS_SETTINGS_COMMAND2           8026
 
 #define IDS_SNIPPET_AUTHOR              9000
 #define IDS_SNIPPET_DESCRIPTION         9001
@@ -649,7 +661,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        400
 #define _APS_NEXT_COMMAND_VALUE         32805
-#define _APS_NEXT_CONTROL_VALUE         1258
+#define _APS_NEXT_CONTROL_VALUE         1267
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

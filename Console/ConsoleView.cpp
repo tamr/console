@@ -150,6 +150,37 @@ LRESULT ConsoleView::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, B
 			strShell	= m_tabDataShell->strShell;
 		}
 
+		// Build startup commands for Clink and Doskey
+		std::wstring strStartupCommands;
+
+		// Add Clink injection command if path is configured
+		if (!m_tabDataShell->strClinkPath.empty())
+		{
+			strStartupCommands += L"\"" + m_tabDataShell->strClinkPath + L"\" inject --quiet";
+		}
+
+		// Add doskey aliases
+		for (const auto& alias : m_tabDataShell->doskeyAliases)
+		{
+			if (alias->bChecked && !alias->strAlias.empty())
+			{
+				if (!strStartupCommands.empty())
+					strStartupCommands += L" & ";
+				strStartupCommands += L"doskey " + alias->strAlias + L"=" + alias->strCommand;
+			}
+		}
+
+		// Modify shell command to include startup commands if any
+		if (!strStartupCommands.empty())
+		{
+			// If shell is empty, use default cmd.exe
+			if (strShell.empty())
+				strShell = L"%ComSpec%";
+
+			// Wrap shell command with /k to run startup commands then stay open
+			strShell = strShell + L" /k " + strStartupCommands;
+		}
+
 		UserCredentials* userCredentials = consoleViewCreate->u.userCredentials;
 
 		consoleOptions.strTitle = m_tabDataShell->strTitle;
