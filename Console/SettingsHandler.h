@@ -881,6 +881,27 @@ struct VarEnv
 	bool         bEnvChecked;
 };
 
+struct DoskeyAlias
+{
+	DoskeyAlias()
+		: strAlias()
+		, strCommand()
+		, bChecked(false)
+	{
+	}
+
+	DoskeyAlias(const std::wstring& alias, const std::wstring& command)
+		: strAlias(alias)
+		, strCommand(command)
+		, bChecked(true)
+	{
+	}
+
+	std::wstring strAlias;
+	std::wstring strCommand;
+	bool         bChecked;
+};
+
 struct TabData
 {
 	TabData()
@@ -896,6 +917,8 @@ struct TabData
 	, bNetOnly(false)
 	, bRunAsAdministrator(false)
 	, bUntrusted(false)
+	, strClinkPath(L"")
+	, bUTF8Locale(false)
 	, bCloneable(true)
 	, bInheritedCursor(true)
 	, dwCursorStyle(0)
@@ -942,6 +965,8 @@ struct TabData
 	bool							bNetOnly;
 	bool							bRunAsAdministrator;
 	bool							bUntrusted;
+	std::wstring					strClinkPath;
+	bool							bUTF8Locale;
 	bool							bCloneable;
 
 	bool							bInheritedCursor;
@@ -961,6 +986,7 @@ struct TabData
 	BYTE                backgroundTextOpacity;
 
 	std::vector<std::shared_ptr<VarEnv>> environmentVariables;
+	std::vector<std::shared_ptr<DoskeyAlias>> doskeyAliases;
 
 	long                nIndex;
 

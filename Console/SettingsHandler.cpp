@@ -2471,6 +2471,8 @@ bool TabSettings::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"net_only"), tabData->bNetOnly, false);
 			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"run_as_admin"), tabData->bRunAsAdministrator, false);
 			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"untrusted"), tabData->bUntrusted, false);
+			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"clink_path"), tabData->strClinkPath, L"");
+			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"utf8_locale"), tabData->bUTF8Locale, false);
 
 			CComPtr<IXMLDOMNodeList> pEnvNodes;
 			if (FAILED(pConsoleElement->selectNodes(CComBSTR(L"env"), &pEnvNodes))) return false;
@@ -2494,6 +2496,32 @@ bool TabSettings::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 
 				if( !varenv->strEnvVariable.empty() )
 					tabData->environmentVariables.push_back(varenv);
+			}
+
+			CComPtr<IXMLDOMNodeList> pDoskeyNodes;
+			if (SUCCEEDED(pConsoleElement->selectNodes(CComBSTR(L"doskey"), &pDoskeyNodes)))
+			{
+				long lDoskeyNodesCount;
+				if( SUCCEEDED(pDoskeyNodes->get_length(&lDoskeyNodesCount)) )
+				{
+					for (long j = 0; j < lDoskeyNodesCount; ++j)
+					{
+						CComPtr<IXMLDOMNode>    pDoskeyNode;
+						CComPtr<IXMLDOMElement> pDoskeyElement;
+
+						if( FAILED(pDoskeyNodes->get_item(j, &pDoskeyNode)) ) continue;
+						if( FAILED(pDoskeyNode.QueryInterface(&pDoskeyElement)) ) continue;
+
+						std::shared_ptr<DoskeyAlias> alias(new DoskeyAlias);
+
+						XmlHelper::GetAttribute(pDoskeyElement, CComBSTR(L"alias"),   alias->strAlias, L"");
+						XmlHelper::GetAttribute(pDoskeyElement, CComBSTR(L"command"), alias->strCommand, L"");
+						XmlHelper::GetAttribute(pDoskeyElement, CComBSTR(L"check"),   alias->bChecked, true);
+
+						if( !alias->strAlias.empty() )
+							tabData->doskeyAliases.push_back(alias);
+					}
+				}
 			}
 		}
 
@@ -2615,6 +2643,8 @@ bool TabSettings::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"net_only"), (*itTab)->bNetOnly);
 		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"run_as_admin"), (*itTab)->bRunAsAdministrator);
 		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"untrusted"), (*itTab)->bUntrusted);
+		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"clink_path"), (*itTab)->strClinkPath);
+		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"utf8_locale"), (*itTab)->bUTF8Locale);
 
 		// add <env> tag
 		if(! (*itTab)->environmentVariables.empty() )
@@ -2627,6 +2657,23 @@ bool TabSettings::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 				XmlHelper::SetAttribute(pNewEnvElement, CComBSTR(L"var"),   (*itTab)->environmentVariables[i]->strEnvVariable);
 				XmlHelper::SetAttribute(pNewEnvElement, CComBSTR(L"value"), (*itTab)->environmentVariables[i]->strEnvValue);
 				XmlHelper::SetAttribute(pNewEnvElement, CComBSTR(L"check"), (*itTab)->environmentVariables[i]->bEnvChecked);
+			}
+
+			// this is just for pretty printing
+			XmlHelper::AddTextNode(pNewConsoleElement, CComBSTR(L"\n\t\t\t"));
+		}
+
+		// add <doskey> tags
+		if(! (*itTab)->doskeyAliases.empty() )
+		{
+			for(size_t i = 0; i < (*itTab)->doskeyAliases.size(); ++i)
+			{
+				CComPtr<IXMLDOMElement> pNewDoskeyElement;
+				if (FAILED(XmlHelper::CreateDomElement(pNewConsoleElement, CComBSTR(L"doskey"), pNewDoskeyElement))) return false;
+
+				XmlHelper::SetAttribute(pNewDoskeyElement, CComBSTR(L"alias"),   (*itTab)->doskeyAliases[i]->strAlias);
+				XmlHelper::SetAttribute(pNewDoskeyElement, CComBSTR(L"command"), (*itTab)->doskeyAliases[i]->strCommand);
+				XmlHelper::SetAttribute(pNewDoskeyElement, CComBSTR(L"check"),   (*itTab)->doskeyAliases[i]->bChecked);
 			}
 
 			// this is just for pretty printing
