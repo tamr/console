@@ -443,7 +443,7 @@ LRESULT ConsoleView::OnConsoleFwdMsg(UINT uMsg, WPARAM wParam, LPARAM lParam, BO
 				// Check if this key matches the configured line break hotkey
 				// and convert it to Shift+Enter if so
 				const HotKeys& hotKeys = g_settingsHandler->GetHotKeys();
-				HotKeys::CommandIDIndex::iterator itLineBreak = hotKeys.commands.get<HotKeys::commandID>().find(ID_SEND_LINEBREAK);
+				HotKeys::CommandIDIndex::iterator itLineBreak = hotKeys.commands.get<HotKeys::commandID>().find(static_cast<WORD>(ID_SEND_LINEBREAK));
 				if (itLineBreak != hotKeys.commands.get<HotKeys::commandID>().end())
 				{
 					const HotKeys::CommandData& cmdData = **itLineBreak;
