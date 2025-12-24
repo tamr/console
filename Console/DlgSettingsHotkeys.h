@@ -28,6 +28,7 @@ class DlgSettingsHotkeys
 		BEGIN_MSG_MAP(DlgSettingsHotkeys)
 			MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 			NOTIFY_CODE_HANDLER(LVN_ITEMCHANGED, OnListItemChanged)
+			NOTIFY_CODE_HANDLER(NM_CLICK, OnListClick)
 			COMMAND_ID_HANDLER(IDC_BTN_ASSIGN, OnBtnAssign)
 			COMMAND_ID_HANDLER(IDC_BTN_CLEAR, OnBtnClear)
 			COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
@@ -42,6 +43,7 @@ class DlgSettingsHotkeys
 		LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 
 		LRESULT OnListItemChanged(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
+		LRESULT OnListClick(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/);
 
 		LRESULT OnBtnAssign(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 		LRESULT OnBtnClear(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

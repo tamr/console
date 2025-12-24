@@ -24,6 +24,7 @@ struct UserCredentials
 	, password()
 	, netOnly(false)
 	, runAsAdministrator(false)
+	, untrusted(false)
 	, strUsername()
 	, strDomain()
 	, strAccountName()
@@ -73,6 +74,7 @@ struct UserCredentials
 	std::wstring	password;
 	bool			netOnly;
 	bool			runAsAdministrator;
+	bool			untrusted;
 	std::wstring	strUsername;
 	std::wstring	strDomain;
 	std::wstring	strAccountName;

@@ -440,27 +440,38 @@ LRESULT ConsoleView::OnConsoleFwdMsg(UINT uMsg, WPARAM wParam, LPARAM lParam, BO
 
 			if( !boolPostMessage )
 			{
-				// Check if this key matches the configured line break hotkey
-				// and convert it to Shift+Enter if so
-				const HotKeys& hotKeys = g_settingsHandler->GetHotKeys();
-				HotKeys::CommandIDIndex::iterator itLineBreak = hotKeys.commands.get<HotKeys::commandID>().find(static_cast<WORD>(ID_SEND_LINEBREAK));
-				if (itLineBreak != hotKeys.commands.get<HotKeys::commandID>().end())
+				// Check if Shift+Enter is pressed and convert to the configured "Send line break as" hotkey
+				// This allows remapping the default line break (Shift+Enter) to a different key combination
+				if (keyEvent.wVirtualKeyCode == VK_RETURN &&
+				    (keyEvent.dwControlKeyState & SHIFT_PRESSED) &&
+				    !(keyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) &&
+				    !(keyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)))
 				{
-					const HotKeys::CommandData& cmdData = **itLineBreak;
-					if (cmdData.accelHotkey.key != 0 &&
-					    keyEvent.wVirtualKeyCode == cmdData.accelHotkey.key)
+					const HotKeys& hotKeys = g_settingsHandler->GetHotKeys();
+					HotKeys::CommandIDIndex::iterator itLineBreak = hotKeys.commands.get<HotKeys::commandID>().find(static_cast<WORD>(ID_SEND_LINEBREAK));
+					if (itLineBreak != hotKeys.commands.get<HotKeys::commandID>().end())
 					{
-						// Build modifier flags from current key state
-						BYTE fVirt = FVIRTKEY;
-						if (keyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) fVirt |= FCONTROL;
-						if (keyEvent.dwControlKeyState & SHIFT_PRESSED) fVirt |= FSHIFT;
-						if (keyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) fVirt |= FALT;
-
-						if (fVirt == cmdData.accelHotkey.fVirt)
+						const HotKeys::CommandData& cmdData = **itLineBreak;
+						// Check if a hotkey is configured and tab filter matches
+						if (cmdData.accelHotkey.key != 0)
 						{
-							// Convert to Shift+Enter: remove Ctrl/Alt, add Shift
-							keyEvent.dwControlKeyState &= ~(LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED | LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED);
-							keyEvent.dwControlKeyState |= SHIFT_PRESSED;
+							// Check tab filter - empty means all tabs
+							bool tabMatches = cmdData.strTabName.empty() ||
+							                  (m_tabDataShell && cmdData.strTabName == m_tabDataShell->strTitle);
+
+							if (tabMatches)
+							{
+								// Convert Shift+Enter to the configured hotkey
+								keyEvent.wVirtualKeyCode = cmdData.accelHotkey.key;
+								keyEvent.dwControlKeyState &= ~SHIFT_PRESSED;
+
+								if (cmdData.accelHotkey.fVirt & FCONTROL)
+									keyEvent.dwControlKeyState |= LEFT_CTRL_PRESSED;
+								if (cmdData.accelHotkey.fVirt & FSHIFT)
+									keyEvent.dwControlKeyState |= SHIFT_PRESSED;
+								if (cmdData.accelHotkey.fVirt & FALT)
+									keyEvent.dwControlKeyState |= LEFT_ALT_PRESSED;
+							}
 						}
 					}
 				}

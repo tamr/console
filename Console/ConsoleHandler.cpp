@@ -449,6 +449,51 @@ void ConsoleHandler::CreateShellProcess
 			throw ConsoleException(boost::str(boost::wformat(Helpers::LoadStringW(IDS_ERR_CANT_START_SHELL_AS_USER)) % strShellCmdLine % userCredentials.user % err.what()));
 		}
 	}
+	else if (userCredentials.untrusted)
+	{
+		// Use Safer API to create a restricted token (equivalent to runas /trustlevel:0x20000)
+		// SAFER_LEVELID_NORMALUSER (0x20000) = "Basic User" - runs with reduced privileges
+		// but still allows DLL loading and IPC needed for ConsoleZ's DLL injection
+		SAFER_LEVEL_HANDLE hLevel = NULL;
+		HANDLE hRestrictedToken = NULL;
+
+		if (!::SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_NORMALUSER, SAFER_LEVEL_OPEN, &hLevel, NULL))
+		{
+			Win32Exception err("SaferCreateLevel", ::GetLastError());
+			throw ConsoleException(boost::str(boost::wformat(Helpers::LoadString(IDS_ERR_CANT_START_SHELL)) % strShellCmdLine % err.what()));
+		}
+
+		if (!::SaferComputeTokenFromLevel(hLevel, NULL, &hRestrictedToken, 0, NULL))
+		{
+			DWORD dwError = ::GetLastError();
+			::SaferCloseLevel(hLevel);
+			Win32Exception err("SaferComputeTokenFromLevel", dwError);
+			throw ConsoleException(boost::str(boost::wformat(Helpers::LoadString(IDS_ERR_CANT_START_SHELL)) % strShellCmdLine % err.what()));
+		}
+
+		::SaferCloseLevel(hLevel);
+
+		if (!::CreateProcessAsUser(
+			hRestrictedToken,
+			NULL,
+			const_cast<wchar_t*>(strCmdLine.c_str()),
+			NULL,
+			NULL,
+			FALSE,
+			dwStartupFlags,
+			const_cast<wchar_t*>(strNewEnvironment.c_str()),
+			(strStartupDir.length() > 0) ? const_cast<wchar_t*>(strStartupDir.c_str()) : NULL,
+			&si,
+			&pi))
+		{
+			DWORD dwError = ::GetLastError();
+			::CloseHandle(hRestrictedToken);
+			Win32Exception err("CreateProcessAsUser", dwError);
+			throw ConsoleException(boost::str(boost::wformat(Helpers::LoadString(IDS_ERR_CANT_START_SHELL)) % strShellCmdLine % err.what()));
+		}
+
+		::CloseHandle(hRestrictedToken);
+	}
 	else
 	{
 		if (!::CreateProcess(

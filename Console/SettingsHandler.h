@@ -710,6 +710,7 @@ struct HotKeys : public SettingsBase
 		bool			bExtended;
 		bool			bGlobal;
 		bool			bWin;
+		std::wstring	strTabName;  // Tab filter - empty means all tabs
 	};
 
 	struct command{};
@@ -894,6 +895,7 @@ struct TabData
 	, strUser()
 	, bNetOnly(false)
 	, bRunAsAdministrator(false)
+	, bUntrusted(false)
 	, bCloneable(true)
 	, bInheritedCursor(true)
 	, dwCursorStyle(0)
@@ -939,6 +941,7 @@ struct TabData
 	std::wstring							strUser;
 	bool							bNetOnly;
 	bool							bRunAsAdministrator;
+	bool							bUntrusted;
 	bool							bCloneable;
 
 	bool							bInheritedCursor;

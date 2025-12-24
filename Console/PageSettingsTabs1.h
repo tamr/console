@@ -45,6 +45,7 @@ class PageSettingsTabs1
 			DDX_TEXT(IDC_TAB_SHELL, m_strShell)
 			DDX_TEXT(IDC_TAB_INIT_DIR, m_strInitialDir)
 			DDX_RADIO(IDC_CHECK_RUN_AS_CURRENT_USER, m_nRunAs)
+			DDX_CHECK(IDC_CHECK_UNTRUSTED, m_bUntrusted)
 			DDX_TEXT(IDC_TAB_USER, m_strUser)
 			DDX_CHECK(IDC_CHECK_NET_ONLY, m_bNetOnly)
 		END_DDX_MAP()
@@ -104,6 +105,7 @@ class PageSettingsTabs1
 		CString			m_strShell;
 		CString			m_strInitialDir;
 		int				m_nRunAs;
+		bool			m_bUntrusted;
 		CString			m_strUser;
 		bool			m_bNetOnly;
 

@@ -2162,6 +2162,8 @@ bool HotKeys::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 
 			if( (*it)->bGlobal )
 				XmlHelper::GetAttribute(pHotKeyElement, CComBSTR(L"win"), (*it)->bWin, false);
+
+			XmlHelper::GetAttribute(pHotKeyElement, CComBSTR(L"tab"), (*it)->strTabName, std::wstring(L""));
 		}
 	}
 
@@ -2233,6 +2235,11 @@ bool HotKeys::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 		{
 			bAttrVal = ((*itCommand)->bWin) ? true : false;
 			XmlHelper::SetAttribute(pNewHotkeyElement, CComBSTR(L"win"), bAttrVal);
+		}
+
+		if( !(*itCommand)->strTabName.empty() )
+		{
+			XmlHelper::SetAttribute(pNewHotkeyElement, CComBSTR(L"tab"), (*itCommand)->strTabName);
 		}
 	}
 
@@ -2463,6 +2470,7 @@ bool TabSettings::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"user"), tabData->strUser, L"");
 			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"net_only"), tabData->bNetOnly, false);
 			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"run_as_admin"), tabData->bRunAsAdministrator, false);
+			XmlHelper::GetAttribute(pConsoleElement, CComBSTR(L"untrusted"), tabData->bUntrusted, false);
 
 			CComPtr<IXMLDOMNodeList> pEnvNodes;
 			if (FAILED(pConsoleElement->selectNodes(CComBSTR(L"env"), &pEnvNodes))) return false;
@@ -2606,6 +2614,7 @@ bool TabSettings::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"user"), (*itTab)->strUser);
 		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"net_only"), (*itTab)->bNetOnly);
 		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"run_as_admin"), (*itTab)->bRunAsAdministrator);
+		XmlHelper::SetAttribute(pNewConsoleElement, CComBSTR(L"untrusted"), (*itTab)->bUntrusted);
 
 		// add <env> tag
 		if(! (*itTab)->environmentVariables.empty() )

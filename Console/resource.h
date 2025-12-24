@@ -347,6 +347,7 @@
 #define IDC_CHECK_KEEP_VIEW_THEME        1255
 #define IDC_TABS_TRANSPARENCY            1256
 #define IDC_CHECK_HIDE_TAB_NEW_BUTTON    1257
+#define IDC_CHECK_UNTRUSTED              1258
 
 #define ID_SNIPPET_ID_FIRST             1900
 #define ID_SNIPPET_ID_LAST              1999
@@ -580,6 +581,7 @@
 #define IDS_SETTINGS_VALUE              8020
 #define IDS_SETTINGS_WINDOWED           8021
 #define IDS_SETTINGS_CONTROLS           8022
+#define IDS_SETTINGS_TAB                8023
 
 #define IDS_SNIPPET_AUTHOR              9000
 #define IDS_SNIPPET_DESCRIPTION         9001

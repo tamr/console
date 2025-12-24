@@ -392,6 +392,7 @@ HWND TabView::CreateNewConsole(ConsoleViewCreate* consoleViewCreate)
 		{
 			userCredentials.runAsAdministrator = m_tabData->bRunAsAdministrator;
 		}
+		userCredentials.untrusted = m_tabData->bUntrusted;
 	}
 
 	HWND hwndConsoleView = consoleView->Create(
