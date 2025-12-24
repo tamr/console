@@ -22,6 +22,7 @@
 //CBitmap	ConsoleView::m_bmpText;
 
 CFont ConsoleView::m_fontText[4];
+CFont ConsoleView::m_fontTextFallback[4];
 DWORD ConsoleView::m_dwFontSize(0);
 DWORD ConsoleView::m_dwFontZoom(100); // 100 %
 DWORD ConsoleView::m_dwScreenDpi(96);
@@ -1477,6 +1478,8 @@ bool ConsoleView::RecreateFont(DWORD dwNewFontSize, bool boolZooming, DWORD dwSc
 
 	for( CFont& font : m_fontText )
 		if( !font.IsNull() ) font.DeleteObject();
+	for( CFont& font : m_fontTextFallback )
+		if( !font.IsNull() ) font.DeleteObject();
 
 	if (!CreateFont(g_settingsHandler->GetAppearanceSettings().fontSettings.strName))
 	{
@@ -2123,6 +2126,80 @@ bool ConsoleView::CreateFont(const std::wstring& strFontName)
 		DEFAULT_PITCH,
 		strFontName.c_str());
 
+	// Create fallback fonts for symbols not present in the primary font
+	// "Segoe UI Symbol" contains many Unicode symbols including dingbats
+	bBold   = fontSettings.bBold;
+	bItalic = fontSettings.bItalic;
+
+	m_fontTextFallback[FontTextNormal].CreateFont(
+		-::MulDiv(m_dwFontSize, m_dwScreenDpi, 72),
+		0,
+		0,
+		0,
+		bBold ? FW_BOLD : 0,
+		bItalic,
+		FALSE,
+		FALSE,
+		DEFAULT_CHARSET,
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		byFontQuality,
+		DEFAULT_PITCH,
+		L"Segoe UI Symbol");
+
+	m_fontTextFallback[FontTextUnderline].CreateFont(
+		-::MulDiv(m_dwFontSize, m_dwScreenDpi, 72),
+		0,
+		0,
+		0,
+		bBold ? FW_BOLD : 0,
+		bItalic,
+		TRUE,
+		FALSE,
+		DEFAULT_CHARSET,
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		byFontQuality,
+		DEFAULT_PITCH,
+		L"Segoe UI Symbol");
+
+	if( fontSettings.bBoldIntensified )
+		bBold = !bBold;
+	if( fontSettings.bItalicIntensified )
+		bItalic = !bItalic;
+
+	m_fontTextFallback[FontTextBright].CreateFont(
+		-::MulDiv(m_dwFontSize, m_dwScreenDpi, 72),
+		0,
+		0,
+		0,
+		bBold ? FW_BOLD : 0,
+		bItalic,
+		FALSE,
+		FALSE,
+		DEFAULT_CHARSET,
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		byFontQuality,
+		DEFAULT_PITCH,
+		L"Segoe UI Symbol");
+
+	m_fontTextFallback[FontTextBrightUnderline].CreateFont(
+		-::MulDiv(m_dwFontSize, m_dwScreenDpi, 72),
+		0,
+		0,
+		0,
+		bBold ? FW_BOLD : 0,
+		bItalic,
+		TRUE,
+		FALSE,
+		DEFAULT_CHARSET,
+		OUT_DEFAULT_PRECIS,
+		CLIP_DEFAULT_PRECIS,
+		byFontQuality,
+		DEFAULT_PITCH,
+		L"Segoe UI Symbol");
+
 	TEXTMETRIC	textMetric;
 
 	dcText.SelectFont(m_fontText[FontTextNormal]);
@@ -2131,6 +2208,8 @@ bool ConsoleView::CreateFont(const std::wstring& strFontName)
 	{
 		TRACE(L"/!\\ can't use %s font\n", strFontName.c_str());
 		for( CFont& font : m_fontText )
+			if( !font.IsNull() ) font.DeleteObject();
+		for( CFont& font : m_fontTextFallback )
 			if( !font.IsNull() ) font.DeleteObject();
 		return false;
 	}
@@ -3033,7 +3112,7 @@ void ConsoleView::RowTextOut(CDC& dc, DWORD dwRow)
         // in italic a part of the previous char is drawn in the following char space
         rect.right  = dwX + dwFGWidth + nCharWidth;
 
-        ExtTextOut(dc, rect, strText, colorFG);
+        ExtTextOut(dc, rect, strText, colorFG, fontTextType);
 
         strText.clear();
         colorFG   = colorFG2;
@@ -3062,7 +3141,7 @@ void ConsoleView::RowTextOut(CDC& dc, DWORD dwRow)
     rect.bottom = dwY + m_nCharHeight;
     rect.right  = dwX + dwFGWidth;
 
-    ExtTextOut(dc, rect, strText, colorFG);
+    ExtTextOut(dc, rect, strText, colorFG, fontTextType);
   }
 
 	auto now4 = std::chrono::high_resolution_clock::now();
@@ -3075,7 +3154,7 @@ void ConsoleView::RowTextOut(CDC& dc, DWORD dwRow)
 		std::chrono::duration_cast<std::chrono::nanoseconds>(now4 - now3).count());
 }
 
-inline void ConsoleView::ExtTextOut(CDC& dc, CRect & rect, std::wstring & strText, COLORREF colorFG)
+inline void ConsoleView::ExtTextOut(CDC& dc, CRect & rect, std::wstring & strText, COLORREF colorFG, FontTextType fontTextType)
 {
 	dc.SetBkMode(TRANSPARENT);
 
@@ -3128,6 +3207,58 @@ inline void ConsoleView::ExtTextOut(CDC& dc, CRect & rect, std::wstring & strTex
 	{
 		dc.SetTextColor(colorFG);
 
+		// Check for missing glyphs and use fallback font if needed
+		UINT textLen = static_cast<UINT>(strText.length());
+		if (textLen > 0 && !m_fontTextFallback[fontTextType].IsNull())
+		{
+			// Get glyph indices to detect missing glyphs
+			std::unique_ptr<WORD[]> glyphIndices(new WORD[textLen]);
+			DWORD result = ::GetGlyphIndices(dc, strText.c_str(), textLen, glyphIndices.get(), GGI_MARK_NONEXISTING_GLYPHS);
+
+			if (result != GDI_ERROR)
+			{
+				// Check if any glyphs are missing (marked as 0xFFFF)
+				bool hasMissingGlyphs = false;
+				for (UINT i = 0; i < textLen; ++i)
+				{
+					if (glyphIndices[i] == 0xFFFF)
+					{
+						hasMissingGlyphs = true;
+						break;
+					}
+				}
+
+				if (hasMissingGlyphs)
+				{
+					// Render character by character, using fallback font for missing glyphs
+					int currentX = rect.left;
+					for (UINT i = 0; i < textLen; ++i)
+					{
+						CRect charRect = rect;
+						charRect.left = currentX;
+						charRect.right = currentX + m_dxWidths[i];
+
+						if (glyphIndices[i] == 0xFFFF)
+						{
+							// Use fallback font for this character
+							dc.SelectFont(m_fontTextFallback[fontTextType]);
+							dc.ExtTextOut(currentX, rect.top, ETO_CLIPPED, &charRect, &strText[i], 1, &m_dxWidths[i]);
+							// Restore primary font
+							dc.SelectFont(m_fontText[fontTextType]);
+						}
+						else
+						{
+							// Use primary font
+							dc.ExtTextOut(currentX, rect.top, ETO_CLIPPED, &charRect, &strText[i], 1, &m_dxWidths[i]);
+						}
+						currentX += m_dxWidths[i];
+					}
+					return;
+				}
+			}
+		}
+
+		// No missing glyphs or fallback not available, use standard rendering
 		dc.ExtTextOut(rect.left, rect.top, ETO_CLIPPED, &rect, strText.c_str(), static_cast<UINT>(strText.length()), m_dxWidths.get());
 	}
 }
