@@ -1075,7 +1075,7 @@ BEGIN
     IDS_FILE_CLOSE_TAB       "Close tab"
     IDS_EDIT_RENAME_TAB      "Rename tab"
     IDS_CLONE_TAB            "Clone tab"
-    IDS_SEND_LINEBREAK       "Send line break"
+    IDS_SEND_LINEBREAK       "Send line break as"
 
     IDS_NEXT_VIEW            "Switch to next view"
     IDS_PREV_VIEW            "Switch to previous view"
@@ -1220,6 +1220,7 @@ IDS_SETTINGS_VARIABLE      "Variable"
 IDS_SETTINGS_VALUE         "Value"
 IDS_SETTINGS_WINDOWED      "Windowed"
 IDS_SETTINGS_CONTROLS      "Controls"
+IDS_SETTINGS_TAB           "Tab"
 END
 
 STRINGTABLE

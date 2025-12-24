@@ -41,9 +41,11 @@ LRESULT DlgSettingsHotkeys::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARA
 
 	m_listCtrl.InsertColumn(0, Helpers::LoadStringW(IDS_SETTINGS_COMMAND).c_str());
 	m_listCtrl.InsertColumn(1, Helpers::LoadStringW(IDS_SETTINGS_HOTKEY).c_str());
+	m_listCtrl.InsertColumn(2, Helpers::LoadStringW(IDS_SETTINGS_TAB).c_str());
 
-	m_listCtrl.SetColumnWidth(0, 170);
-	m_listCtrl.SetColumnWidth(1, 218);
+	m_listCtrl.SetColumnWidth(0, 140);
+	m_listCtrl.SetColumnWidth(1, 100);
+	m_listCtrl.SetColumnWidth(2, 80);
 
 	HotKeys::CommandsSequence::iterator	it = m_hotKeys.commands.begin();
 	for (; it != m_hotKeys.commands.end(); ++it)
@@ -62,6 +64,7 @@ LRESULT DlgSettingsHotkeys::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARA
 		int nItem = m_listCtrl.InsertItem(m_listCtrl.GetItemCount(), (*it)->strDescription.c_str());
 		m_listCtrl.SetItemData(nItem, reinterpret_cast<DWORD_PTR>(it->get()));
 		m_listCtrl.SetItemText(nItem, 1, strKeyName);
+		m_listCtrl.SetItemText(nItem, 2, (*it)->strTabName.c_str());
 	}
 
 	m_listCtrl.SelectItem(0);
@@ -103,6 +106,72 @@ LRESULT DlgSettingsHotkeys::OnListItemChanged(int /*idCtrl*/, LPNMHDR pnmh, BOOL
 	}
 	m_hotKeyEdit.SetHotKey(pCommandData->accelHotkey.key, wModifiers);
 	m_hotKeyEdit.UseGlobalKeys(pCommandData->bGlobal);
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+LRESULT DlgSettingsHotkeys::OnListClick(int /*idCtrl*/, LPNMHDR pnmh, BOOL& /*bHandled*/)
+{
+	NMITEMACTIVATE* pnmia = reinterpret_cast<NMITEMACTIVATE*>(pnmh);
+
+	// Only handle clicks on the Tab column (column 2)
+	if (pnmia->iSubItem != 2 || pnmia->iItem < 0)
+		return 0;
+
+	// Get the CommandData for this row
+	LVITEM item;
+	::ZeroMemory(&item, sizeof(LVITEM));
+	item.mask = LVIF_PARAM;
+	item.iItem = pnmia->iItem;
+	if (!m_listCtrl.GetItem(&item))
+		return 0;
+
+	HotKeys::CommandData* pCommandData = reinterpret_cast<HotKeys::CommandData*>(item.lParam);
+	if (!pCommandData)
+		return 0;
+
+	// Build popup menu with tab names
+	CMenu menu;
+	menu.CreatePopupMenu();
+
+	// Add "All tabs" option (clears the filter)
+	menu.AppendMenu(MF_STRING, 1, L"(All tabs)");
+	menu.AppendMenu(MF_SEPARATOR);
+
+	// Get tab names from settings
+	TabDataVector& tabDataVector = g_settingsHandler->GetTabSettings().tabDataVector;
+	UINT menuId = 2;
+	for (auto it = tabDataVector.begin(); it != tabDataVector.end(); ++it, ++menuId)
+	{
+		menu.AppendMenu(MF_STRING, menuId, (*it)->strTitle.c_str());
+	}
+
+	// Show menu at click position
+	POINT pt;
+	::GetCursorPos(&pt);
+	UINT nCmd = menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RETURNCMD, pt.x, pt.y, m_hWnd);
+
+	if (nCmd == 1)
+	{
+		// "All tabs" selected - clear the filter
+		pCommandData->strTabName.clear();
+		m_listCtrl.SetItemText(pnmia->iItem, 2, L"");
+	}
+	else if (nCmd >= 2)
+	{
+		// Specific tab selected
+		size_t tabIndex = nCmd - 2;
+		if (tabIndex < tabDataVector.size())
+		{
+			pCommandData->strTabName = tabDataVector[tabIndex]->strTitle;
+			m_listCtrl.SetItemText(pnmia->iItem, 2, pCommandData->strTabName.c_str());
+		}
+	}
 
 	return 0;
 }

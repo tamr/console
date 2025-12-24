@@ -2162,6 +2162,8 @@ bool HotKeys::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 
 			if( (*it)->bGlobal )
 				XmlHelper::GetAttribute(pHotKeyElement, CComBSTR(L"win"), (*it)->bWin, false);
+
+			XmlHelper::GetAttribute(pHotKeyElement, CComBSTR(L"tab"), (*it)->strTabName, std::wstring(L""));
 		}
 	}
 
@@ -2233,6 +2235,11 @@ bool HotKeys::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 		{
 			bAttrVal = ((*itCommand)->bWin) ? true : false;
 			XmlHelper::SetAttribute(pNewHotkeyElement, CComBSTR(L"win"), bAttrVal);
+		}
+
+		if( !(*itCommand)->strTabName.empty() )
+		{
+			XmlHelper::SetAttribute(pNewHotkeyElement, CComBSTR(L"tab"), (*itCommand)->strTabName);
 		}
 	}
 

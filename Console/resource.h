@@ -580,6 +580,7 @@
 #define IDS_SETTINGS_VALUE              8020
 #define IDS_SETTINGS_WINDOWED           8021
 #define IDS_SETTINGS_CONTROLS           8022
+#define IDS_SETTINGS_TAB                8023
 
 #define IDS_SNIPPET_AUTHOR              9000
 #define IDS_SNIPPET_DESCRIPTION         9001
