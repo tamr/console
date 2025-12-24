@@ -2091,6 +2091,7 @@ HotKeys::HotKeys()
 	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"cmdSnippets",        ID_SHOW_CONTEXT_MENU_SNIPPETS,  ID_SHOW_CONTEXT_MENU_SNIPPETS )));
 
 	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"ctrlC",              ID_SEND_CTRL_C,          IDS_SEND_CTRL_C    )));
+	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"linebreak",          ID_SEND_LINEBREAK,       IDS_SEND_LINEBREAK )));
 
 	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"wspload",            ID_LOAD_WORKSPACE,       IDS_LOAD_WORKSPACE )));
 	commands.push_back(std::shared_ptr<CommandData>(new CommandData(L"wspsave",            ID_SAVE_WORKSPACE,       IDS_SAVE_WORKSPACE )));
@@ -2117,18 +2118,6 @@ bool HotKeys::Load(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 	if( SUCCEEDED(XmlHelper::GetDomElement(pSettingsRoot, CComBSTR(L"hotkeys"), pHotkeysElement)) )
 	{
 		XmlHelper::GetAttribute(pHotkeysElement, CComBSTR(L"use_scroll_lock"), bUseScrollLock, false);
-
-		// Load line break hotkey settings
-		CComPtr<IXMLDOMElement> pLineBreakElement;
-		if( SUCCEEDED(XmlHelper::GetDomElement(pHotkeysElement, CComBSTR(L"linebreak"), pLineBreakElement)) )
-		{
-			DWORD dwKeyCode = 0;
-			XmlHelper::GetAttribute(pLineBreakElement, CComBSTR(L"code"), dwKeyCode, 0);
-			XmlHelper::GetAttribute(pLineBreakElement, CComBSTR(L"ctrl"), lineBreakHotkey.bCtrl, false);
-			XmlHelper::GetAttribute(pLineBreakElement, CComBSTR(L"shift"), lineBreakHotkey.bShift, false);
-			XmlHelper::GetAttribute(pLineBreakElement, CComBSTR(L"alt"), lineBreakHotkey.bAlt, false);
-			lineBreakHotkey.wVirtualKey = static_cast<WORD>(dwKeyCode);
-		}
 
 		CComPtr<IXMLDOMNodeList> pHotKeyNodes;
 		if( FAILED(pHotkeysElement->selectNodes(CComBSTR(L"hotkey"), &pHotKeyNodes)) ) return false;
@@ -2247,19 +2236,6 @@ bool HotKeys::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 		}
 	}
 
-	// Save line break hotkey
-	if (lineBreakHotkey.IsEnabled())
-	{
-		CComPtr<IXMLDOMElement> pLineBreakElement;
-		if( SUCCEEDED(XmlHelper::CreateDomElement(pHotkeysElement, CComBSTR(L"linebreak"), pLineBreakElement)) )
-		{
-			XmlHelper::SetAttribute(pLineBreakElement, CComBSTR(L"code"), static_cast<DWORD>(lineBreakHotkey.wVirtualKey));
-			XmlHelper::SetAttribute(pLineBreakElement, CComBSTR(L"ctrl"), lineBreakHotkey.bCtrl);
-			XmlHelper::SetAttribute(pLineBreakElement, CComBSTR(L"shift"), lineBreakHotkey.bShift);
-			XmlHelper::SetAttribute(pLineBreakElement, CComBSTR(L"alt"), lineBreakHotkey.bAlt);
-		}
-	}
-
 	// this is just for pretty printing
 	XmlHelper::AddTextNode(pHotkeysElement, CComBSTR(L"\n\t"));
 
@@ -2293,7 +2269,6 @@ bool HotKeys::Save(const CComPtr<IXMLDOMElement>& pSettingsRoot)
 HotKeys& HotKeys::operator=(const HotKeys& other)
 {
 	bUseScrollLock = other.bUseScrollLock;
-	lineBreakHotkey = other.lineBreakHotkey;
 
 	commands.clear();
 	commands.insert(commands.begin(), other.commands.begin(), other.commands.end());

@@ -442,18 +442,26 @@ LRESULT ConsoleView::OnConsoleFwdMsg(UINT uMsg, WPARAM wParam, LPARAM lParam, BO
 			{
 				// Check if this key matches the configured line break hotkey
 				// and convert it to Shift+Enter if so
-				const HotKeys::LineBreakHotkey& lineBreakHotkey = g_settingsHandler->GetHotKeys().lineBreakHotkey;
-				if (lineBreakHotkey.IsEnabled() && keyEvent.wVirtualKeyCode == VK_RETURN)
+				const HotKeys& hotKeys = g_settingsHandler->GetHotKeys();
+				HotKeys::CommandIDIndex::iterator itLineBreak = hotKeys.commands.get<HotKeys::commandID>().find(ID_SEND_LINEBREAK);
+				if (itLineBreak != hotKeys.commands.get<HotKeys::commandID>().end())
 				{
-					bool hasCtrl = (keyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) != 0;
-					bool hasShift = (keyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
-					bool hasAlt = (keyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) != 0;
-
-					if (lineBreakHotkey.Matches(VK_RETURN, hasCtrl, hasShift, hasAlt))
+					const HotKeys::CommandData& cmdData = **itLineBreak;
+					if (cmdData.accelHotkey.key != 0 &&
+					    keyEvent.wVirtualKeyCode == cmdData.accelHotkey.key)
 					{
-						// Convert to Shift+Enter: remove Ctrl/Alt, add Shift
-						keyEvent.dwControlKeyState &= ~(LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED | LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED);
-						keyEvent.dwControlKeyState |= SHIFT_PRESSED;
+						// Build modifier flags from current key state
+						BYTE fVirt = FVIRTKEY;
+						if (keyEvent.dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED)) fVirt |= FCONTROL;
+						if (keyEvent.dwControlKeyState & SHIFT_PRESSED) fVirt |= FSHIFT;
+						if (keyEvent.dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED)) fVirt |= FALT;
+
+						if (fVirt == cmdData.accelHotkey.fVirt)
+						{
+							// Convert to Shift+Enter: remove Ctrl/Alt, add Shift
+							keyEvent.dwControlKeyState &= ~(LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED | LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED);
+							keyEvent.dwControlKeyState |= SHIFT_PRESSED;
+						}
 					}
 				}
 

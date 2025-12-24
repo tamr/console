@@ -733,24 +733,6 @@ struct HotKeys : public SettingsBase
 	std::array<std::wstring, EXTERNAL_COMMANDS_COUNT> externalCommands;
 
 	bool		bUseScrollLock;
-
-	// Alternative line break hotkey (sends Shift+Enter to console)
-	// Default: Ctrl+Enter
-	struct LineBreakHotkey
-	{
-		WORD wVirtualKey;    // VK code (0 = disabled)
-		bool bCtrl;
-		bool bShift;
-		bool bAlt;
-
-		LineBreakHotkey() : wVirtualKey(0), bCtrl(false), bShift(false), bAlt(false) {}
-
-		bool IsEnabled() const { return wVirtualKey != 0; }
-		bool Matches(WORD vk, bool ctrl, bool shift, bool alt) const
-		{
-			return IsEnabled() && wVirtualKey == vk && bCtrl == ctrl && bShift == shift && bAlt == alt;
-		}
-	} lineBreakHotkey;
 };
 
 //////////////////////////////////////////////////////////////////////////////

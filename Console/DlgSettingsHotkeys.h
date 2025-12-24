@@ -30,8 +30,6 @@ class DlgSettingsHotkeys
 			NOTIFY_CODE_HANDLER(LVN_ITEMCHANGED, OnListItemChanged)
 			COMMAND_ID_HANDLER(IDC_BTN_ASSIGN, OnBtnAssign)
 			COMMAND_ID_HANDLER(IDC_BTN_CLEAR, OnBtnClear)
-			COMMAND_ID_HANDLER(IDC_BTN_LINEBREAK_ASSIGN, OnBtnLineBreakAssign)
-			COMMAND_ID_HANDLER(IDC_BTN_LINEBREAK_CLEAR, OnBtnLineBreakClear)
 			COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
 			COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
 		END_MSG_MAP()
@@ -47,8 +45,6 @@ class DlgSettingsHotkeys
 
 		LRESULT OnBtnAssign(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 		LRESULT OnBtnClear(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-		LRESULT OnBtnLineBreakAssign(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-		LRESULT OnBtnLineBreakClear(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 		LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 	private:
@@ -58,7 +54,6 @@ class DlgSettingsHotkeys
 		CListViewCtrl	m_listCtrl;
 		CEdit			m_editCommand;
 		CHotkeyEdit		m_hotKeyEdit;
-		CHotkeyEdit		m_lineBreakHotKeyEdit;
 };
 
 //////////////////////////////////////////////////////////////////////////////
