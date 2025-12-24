@@ -452,10 +452,12 @@ void ConsoleHandler::CreateShellProcess
 	else if (userCredentials.untrusted)
 	{
 		// Use Safer API to create a restricted token (equivalent to runas /trustlevel:0x20000)
+		// SAFER_LEVELID_NORMALUSER (0x20000) = "Basic User" - runs with reduced privileges
+		// but still allows DLL loading and IPC needed for ConsoleZ's DLL injection
 		SAFER_LEVEL_HANDLE hLevel = NULL;
 		HANDLE hRestrictedToken = NULL;
 
-		if (!::SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_UNTRUSTED, SAFER_LEVEL_OPEN, &hLevel, NULL))
+		if (!::SaferCreateLevel(SAFER_SCOPEID_USER, SAFER_LEVELID_NORMALUSER, SAFER_LEVEL_OPEN, &hLevel, NULL))
 		{
 			Win32Exception err("SaferCreateLevel", ::GetLastError());
 			throw ConsoleException(boost::str(boost::wformat(Helpers::LoadString(IDS_ERR_CANT_START_SHELL)) % strShellCmdLine % err.what()));
