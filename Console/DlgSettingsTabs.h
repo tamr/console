@@ -6,6 +6,7 @@
 #include "PageSettingsTabs2.h"
 #include "PageSettingsTabsColors.h"
 #include "PageSettingsTabsEnv.h"
+#include "PageSettingsTabsDoskey.h"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -84,7 +85,8 @@ class DlgSettingsTabs
 		PageSettingsTabs2       m_page2;
 		PageSettingsTabsColors  m_page3;
 		PageSettingsTabsEnv     m_page4;
-		PageSettingsTab	*       m_pages[4];
+		PageSettingsTabsDoskey  m_page5;
+		PageSettingsTab	*       m_pages[5];
 };
 
 //////////////////////////////////////////////////////////////////////////////

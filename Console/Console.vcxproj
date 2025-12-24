@@ -633,6 +633,7 @@ copy "..\setup\dlls\x64\FreeImagePlus.dll" "..\bin\$(Platform)\$(Configuration)\
     <ClCompile Include="PageSettingsTabs2.cpp" />
     <ClCompile Include="PageSettingsTabsColors.cpp" />
     <ClCompile Include="PageSettingsTabsEnv.cpp" />
+    <ClCompile Include="PageSettingsTabsDoskey.cpp" />
     <ClCompile Include="SelectionHandler.cpp" />
     <ClCompile Include="SettingsHandler.cpp" />
     <ClCompile Include="Snippet.cpp" />
@@ -693,6 +694,7 @@ copy "..\setup\dlls\x64\FreeImagePlus.dll" "..\bin\$(Platform)\$(Configuration)\
     <ClInclude Include="PageSettingsTabs2.h" />
     <ClInclude Include="PageSettingsTabsColors.h" />
     <ClInclude Include="PageSettingsTabsEnv.h" />
+    <ClInclude Include="PageSettingsTabsDoskey.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="DynamicDialog.h" />
     <ClInclude Include="SelectionHandler.h" />

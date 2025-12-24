@@ -23,6 +23,7 @@ class PageSettingsTabsEnv
 			COMMAND_ID_HANDLER(IDC_BTN_ENV_ADD,    OnClickedBtnEnvAdd)
 			COMMAND_ID_HANDLER(IDC_BTN_ENV_DELETE, OnClickedBtnEnvDelete)
 			COMMAND_ID_HANDLER(IDC_BTN_ENV_EDIT,   OnClickedBtnEnvEdit)
+			COMMAND_ID_HANDLER(IDC_BTN_BROWSE_CLINK, OnClickedBtnBrowseClink)
 		END_MSG_MAP()
 
 		LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
@@ -30,6 +31,7 @@ class PageSettingsTabsEnv
 		LRESULT OnClickedBtnEnvAdd   (WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 		LRESULT OnClickedBtnEnvDelete(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 		LRESULT OnClickedBtnEnvEdit  (WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+		LRESULT OnClickedBtnBrowseClink(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 		void Load(std::shared_ptr<TabData>& tabData);
 		void Save();
@@ -41,6 +43,8 @@ class PageSettingsTabsEnv
 		CListViewCtrl       m_listCtrl;
 		CEdit               m_editVariable;
 		CEdit               m_editValue;
+		CEdit               m_editClinkPath;
+		CButton             m_checkUTF8Locale;
 };
 
 //////////////////////////////////////////////////////////////////////////////
