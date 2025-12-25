@@ -1183,7 +1183,7 @@ LRESULT ConsoleView::OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BO
 
 	if (wParam == CURSOR_TIMER)
 	{
-		if( m_consoleHandler.GetCursorInfo()->bVisible ) return 0;
+		if( !m_consoleHandler.GetCursorInfo()->bVisible ) return 0;
 
 		if (m_cursor.get())
 		{
